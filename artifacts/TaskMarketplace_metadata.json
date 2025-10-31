@@ -6,9 +6,96 @@
 	"output": {
 		"abi": [
 			{
-				"inputs": [],
+				"inputs": [
+					{
+						"internalType": "address",
+						"name": "_governanceToken",
+						"type": "address"
+					}
+				],
 				"stateMutability": "nonpayable",
 				"type": "constructor"
+			},
+			{
+				"anonymous": false,
+				"inputs": [
+					{
+						"indexed": false,
+						"internalType": "uint256",
+						"name": "taskId",
+						"type": "uint256"
+					},
+					{
+						"indexed": false,
+						"internalType": "address",
+						"name": "objector",
+						"type": "address"
+					},
+					{
+						"indexed": false,
+						"internalType": "uint256",
+						"name": "deposit",
+						"type": "uint256"
+					},
+					{
+						"indexed": false,
+						"internalType": "uint256",
+						"name": "startTime",
+						"type": "uint256"
+					}
+				],
+				"name": "DisputeCreated",
+				"type": "event"
+			},
+			{
+				"anonymous": false,
+				"inputs": [
+					{
+						"indexed": false,
+						"internalType": "uint256",
+						"name": "taskId",
+						"type": "uint256"
+					},
+					{
+						"indexed": false,
+						"internalType": "bool",
+						"name": "finalDecision",
+						"type": "bool"
+					}
+				],
+				"name": "DisputeFinalized",
+				"type": "event"
+			},
+			{
+				"anonymous": false,
+				"inputs": [
+					{
+						"indexed": false,
+						"internalType": "uint256",
+						"name": "taskId",
+						"type": "uint256"
+					},
+					{
+						"indexed": false,
+						"internalType": "address",
+						"name": "juror",
+						"type": "address"
+					},
+					{
+						"indexed": false,
+						"internalType": "bool",
+						"name": "supportsSolution",
+						"type": "bool"
+					},
+					{
+						"indexed": false,
+						"internalType": "uint256",
+						"name": "weight",
+						"type": "uint256"
+					}
+				],
+				"name": "JurorVoted",
+				"type": "event"
 			},
 			{
 				"anonymous": false,
@@ -91,25 +178,6 @@
 					{
 						"indexed": false,
 						"internalType": "address",
-						"name": "objector",
-						"type": "address"
-					}
-				],
-				"name": "TaskObjected",
-				"type": "event"
-			},
-			{
-				"anonymous": false,
-				"inputs": [
-					{
-						"indexed": false,
-						"internalType": "uint256",
-						"name": "taskId",
-						"type": "uint256"
-					},
-					{
-						"indexed": false,
-						"internalType": "address",
 						"name": "creator",
 						"type": "address"
 					},
@@ -128,6 +196,45 @@
 				],
 				"name": "TaskPosted",
 				"type": "event"
+			},
+			{
+				"inputs": [
+					{
+						"internalType": "uint256",
+						"name": "_taskId",
+						"type": "uint256"
+					}
+				],
+				"name": "createDispute",
+				"outputs": [],
+				"stateMutability": "payable",
+				"type": "function"
+			},
+			{
+				"inputs": [],
+				"name": "disputePeriod",
+				"outputs": [
+					{
+						"internalType": "uint256",
+						"name": "",
+						"type": "uint256"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"inputs": [
+					{
+						"internalType": "uint256",
+						"name": "_taskId",
+						"type": "uint256"
+					}
+				],
+				"name": "finalizeDispute",
+				"outputs": [],
+				"stateMutability": "nonpayable",
+				"type": "function"
 			},
 			{
 				"inputs": [
@@ -234,16 +341,52 @@
 				"type": "function"
 			},
 			{
+				"inputs": [],
+				"name": "governanceToken",
+				"outputs": [
+					{
+						"internalType": "contract IERC20",
+						"name": "",
+						"type": "address"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
 				"inputs": [
 					{
 						"internalType": "uint256",
 						"name": "_taskId",
 						"type": "uint256"
+					},
+					{
+						"internalType": "uint256",
+						"name": "_tokenAmount",
+						"type": "uint256"
+					},
+					{
+						"internalType": "bool",
+						"name": "supportsSolution",
+						"type": "bool"
 					}
 				],
-				"name": "objectToVerification",
+				"name": "jurorVote",
 				"outputs": [],
 				"stateMutability": "nonpayable",
+				"type": "function"
+			},
+			{
+				"inputs": [],
+				"name": "minJurorStake",
+				"outputs": [
+					{
+						"internalType": "uint256",
+						"name": "",
+						"type": "uint256"
+					}
+				],
+				"stateMutability": "view",
 				"type": "function"
 			},
 			{
@@ -324,11 +467,11 @@
 	},
 	"sources": {
 		"contracts/marketplace.sol": {
-			"keccak256": "0xc207006e96024bc0f1648fc1a58bcabdad911c0d3a794210d1e9dd09966b34fc",
+			"keccak256": "0xac58875bddc6e22182714d3ce172d088ece948a1e6d48561f41bb0354223eda2",
 			"license": "GPL-3.0",
 			"urls": [
-				"bzz-raw://7e628bd71906b581a9b12a41fe62d0acd4d8bfffcdfcbf6f0e0221cc799baf1b",
-				"dweb:/ipfs/QmUMaUHbvUy9eXwN6Dwq6svSRNJ6CBTg1w4YJevZ9nskgd"
+				"bzz-raw://94b0bc475cc22d3a3fb25563ef6c80fca4cbfe4a3733da198264583afab5999a",
+				"dweb:/ipfs/QmdiDuGMVRPG1UZEkXQgzdWFiKVQV4WNA3nGQY3gmkV24K"
 			]
 		}
 	},
