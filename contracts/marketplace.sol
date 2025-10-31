@@ -45,7 +45,7 @@ contract TaskMarketplace {
 
     uint256 submitCost = 0.01 ether;
     uint256 verifyCost = 0.01 ether;
-    uint256 public minJurorStake = 100 * (10 ** 18);
+    uint256 public minJurorStake = 100;
     uint256 public disputePeriod = 3 minutes;
 
     IERC20 public governanceToken;
@@ -61,6 +61,9 @@ contract TaskMarketplace {
     constructor(address _governanceToken) {
         governanceToken = IERC20(_governanceToken);
     }
+
+    // constructor() {
+    // }
 
     //posting a task
     function postTask(string calldata _descriptionHash) external payable {
@@ -331,6 +334,15 @@ contract TaskMarketplace {
             return 0;
         } else {
             return (tasks[_taskId].deadline - block.timestamp);
+        }
+    }
+    function getRemainingDisputeTime(uint256 _taskId) external view returns (uint256 Seconds) {
+        require(_taskId > 0 && _taskId <= taskCount, "Invalid task id");
+
+        if (disputes[_taskId].startTime == 0 || disputes[_taskId].startTime + disputePeriod >= block.timestamp) {
+            return 0;
+        } else {
+            return (block.timestamp - (disputes[_taskId].startTime + disputePeriod));
         }
     }
 

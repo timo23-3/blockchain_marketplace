@@ -42,4 +42,10 @@ contract MockToken {
         emit Transfer(_from, _to, _value);
         return true;
     }
+    function getAllowance(address _sender, address _receiver) external view returns (uint256) {
+        return allowance[_sender][_receiver];
+    }
+    function getBalance (address _addr) external view returns (uint256) {
+        return balanceOf[_addr];
+    }
 }
