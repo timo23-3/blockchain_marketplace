@@ -8,7 +8,7 @@ interface IERC20 {
 }
 
 contract TaskMarketplace {
-    enum TaskStatus { Open, Submitted, Verified, Disputed, Accepted, Rejected }
+    enum TaskStatus { Open, Submitted, Verified, Disputed, Accepted, Rejected, Unsolved }
 
     struct Task {
         address creator;
@@ -18,6 +18,7 @@ contract TaskMarketplace {
         string descriptionHash;
         string solutionHash;
         bool approved;
+        uint256 solve_deadline;
         uint256 deadline;
         TaskStatus status;
         // add: verifier percentage?, time for objection?, stake amount
@@ -50,13 +51,14 @@ contract TaskMarketplace {
 
     IERC20 public governanceToken;
 
-    event TaskPosted(uint256 taskId, address creator, uint256 bounty, string descriptionHash);
+    event TaskPosted(uint256 taskId, address creator, uint256 bounty, string descriptionHash, uint256 maxTime);
     event SolutionSubmitted(uint256 taskId, address solver, string solutionHash);
     event SolutionVerified(uint256 taskId, address verifier, bool approved);
     event DisputeCreated(uint256 taskId, address objector, uint256 deposit, uint256 startTime);
     event JurorVoted(uint256 taskId, address juror, bool supportsSolution, uint256 weight);
     event DisputeFinalized(uint256 taskId, bool finalDecision);
     event TaskFinalized(uint256 taskId, bool success);
+    event TaskUnsolved(uint256 taskId);
 
     constructor(address _governanceToken) {
         governanceToken = IERC20(_governanceToken);
@@ -66,7 +68,7 @@ contract TaskMarketplace {
     // }
 
     //posting a task
-    function postTask(string calldata _descriptionHash) external payable {
+    function postTask(string calldata _descriptionHash, uint256 _maxTime) external payable {
         require(msg.value > 0, "Must send bounty");
 
         taskCount++;
@@ -76,18 +78,19 @@ contract TaskMarketplace {
         t.descriptionHash = _descriptionHash;
         t.approved = false;
         t.status = TaskStatus.Open;
-
-        emit TaskPosted(taskCount, msg.sender, msg.value, _descriptionHash);
+        t.solve_deadline = block.timestamp + (_maxTime * 1 days);
+        emit TaskPosted(taskCount, msg.sender, msg.value, _descriptionHash, _maxTime);
     }
 
     //submitting a solution
     function submitSolution(uint256 _taskId, string calldata _solutionHash) external payable {
         require(_taskId > 0 && _taskId <= taskCount, "Invalid task id");
-        
+    
         Task storage t = tasks[_taskId];
         require(t.status == TaskStatus.Open, "Task not open (yet)");
         require(msg.value == submitCost, "Stake required");
         require(t.solver == address(0), "A solution has already been submitted");
+        require(t.solve_deadline < block.timestamp, "Too late, can't solve anymore");
 
         t.solutionHash = _solutionHash;
         t.solver = msg.sender;
@@ -205,7 +208,7 @@ contract TaskMarketplace {
             t2.descriptionHash = t.descriptionHash;
             t2.approved = false;
             t2.status = TaskStatus.Open;
-
+            t2.solve_deadline = t.solve_deadline;
 
             // t.status = TaskStatus.Open;
             // t.solver = address(0);
@@ -286,7 +289,19 @@ contract TaskMarketplace {
         require(_taskId > 0 && _taskId <= taskCount, "Invalid task id");
 
         Task storage t = tasks[_taskId];
-        require(t.status == TaskStatus.Verified, "Task not verified (yet)");
+
+        // pay money back to creator if Task open and time exceeded. 
+        // If currently in verification process the task creator will have to wait and can receive money back
+        // as soon as solution was rejected (will not receive money back if solution is accepted of course)
+        if (t.solve_deadline <= block.timestamp && t.status == TaskStatus.Open) {
+            t.status = TaskStatus.Unsolved;
+
+            payable(t.solver).transfer(t.bounty);
+
+            emit TaskUnsolved(_taskId);
+            return;
+        }
+        require(t.status == TaskStatus.Verified, "Task not in verified state (yet/anymore)");
         require(block.timestamp > t.deadline, "Waiting time not passed yet");
         require(t.verifier != address(0), "No verifier yet"); // redundant
         require(!disputes[_taskId].exists, "disputed");
@@ -309,7 +324,8 @@ contract TaskMarketplace {
             t2.descriptionHash = t.descriptionHash;
             t2.approved = false;
             t2.status = TaskStatus.Open;
-
+            t2.solve_deadline = t.solve_deadline;
+            
             // t.status = TaskStatus.Open;
             // t.solver = address(0);
             // t.verifier = address(0);
@@ -327,6 +343,7 @@ contract TaskMarketplace {
         uint256 bounty,
         string memory descriptionHash,
         string memory solutionHash,
+        uint256 solve_deadline,
         bool approved,
         uint256 deadline,
         TaskStatus status
@@ -334,7 +351,7 @@ contract TaskMarketplace {
         require(_taskId > 0 && _taskId <= taskCount, "Invalid task id");
 
         Task storage t = tasks[_taskId];
-        return (t.creator, t.solver, t.verifier, t.bounty, t.descriptionHash, t.solutionHash, t.approved, t.deadline, t.status);
+        return (t.creator, t.solver, t.verifier, t.bounty, t.descriptionHash, t.solutionHash, t.solve_deadline, t.approved, t.deadline, t.status);
     }
 
     function getRemainingTime(uint256 _taskId) external view returns (uint256 Seconds) {

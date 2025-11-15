@@ -192,9 +192,28 @@
 						"internalType": "string",
 						"name": "descriptionHash",
 						"type": "string"
+					},
+					{
+						"indexed": false,
+						"internalType": "uint256",
+						"name": "maxTime",
+						"type": "uint256"
 					}
 				],
 				"name": "TaskPosted",
+				"type": "event"
+			},
+			{
+				"anonymous": false,
+				"inputs": [
+					{
+						"indexed": false,
+						"internalType": "uint256",
+						"name": "taskId",
+						"type": "uint256"
+					}
+				],
+				"name": "TaskUnsolved",
 				"type": "event"
 			},
 			{
@@ -328,6 +347,11 @@
 						"type": "string"
 					},
 					{
+						"internalType": "uint256",
+						"name": "solve_deadline",
+						"type": "uint256"
+					},
+					{
 						"internalType": "bool",
 						"name": "approved",
 						"type": "bool"
@@ -414,6 +438,11 @@
 						"internalType": "string",
 						"name": "_descriptionHash",
 						"type": "string"
+					},
+					{
+						"internalType": "uint256",
+						"name": "_maxTime",
+						"type": "uint256"
 					}
 				],
 				"name": "postTask",
@@ -486,11 +515,11 @@
 	},
 	"sources": {
 		"contracts/marketplace.sol": {
-			"keccak256": "0x170a0531a846a0fbc0f35a43f18a6848939de7a54b6b91a2d51369bb65faa87f",
+			"keccak256": "0x1123678a1498542e140c2434554acd6a448b027a5c1f3e36abfc1fa5543a7889",
 			"license": "GPL-3.0",
 			"urls": [
-				"bzz-raw://c7c9bd77962d91ec5e8379202ee72d5ade357358c9fe87d82920fdaad7810ff3",
-				"dweb:/ipfs/QmafLd531T6HWFRC11XWLBpjH2C9g5tbshutFhC7hgifkG"
+				"bzz-raw://786ed94899823a66b90a1d187946a44d4aabc511b80c6b9981b1d1d78d6ac848",
+				"dweb:/ipfs/QmWmDQntoEA3YkYFePcFqyiTap4BHoqY8yf7ZDHZvUSp1y"
 			]
 		}
 	},
