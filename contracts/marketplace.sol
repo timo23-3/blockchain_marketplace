@@ -300,12 +300,22 @@ contract TaskMarketplace {
         } else { 
             payable(t.verifier).transfer(submitCost + verifyCost);
             
-            t.status = TaskStatus.Open;
-            t.solver = address(0);
-            t.verifier = address(0);
-            t.solutionHash = "";
-            t.deadline = 0;
-            t.approved = false;
+            t.status = TaskStatus.Rejected;
+            
+            taskCount++;
+            Task storage t2 = tasks[taskCount];
+            t2.creator = t.creator;
+            t2.bounty = t.bounty;
+            t2.descriptionHash = t.descriptionHash;
+            t2.approved = false;
+            t2.status = TaskStatus.Open;
+
+            // t.status = TaskStatus.Open;
+            // t.solver = address(0);
+            // t.verifier = address(0);
+            // t.solutionHash = "";
+            // t.deadline = 0;
+            // t.approved = false;
         }
         emit TaskFinalized(_taskId, t.approved);
     }
